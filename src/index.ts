@@ -1,32 +1,35 @@
 import 'dotenv/config'
-import express from 'express'
+import express, { Request, Response, NextFunction } from 'express'
 import cors from 'cors'
+import morgan from 'morgan'
 
 const app = express()
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3001
 
-// Middleware
+// Befintligt middleware snom vi använder globalt (för varje request som kommer in så körs denna middleware)
+app.use(morgan('tiny'));
+app.use(express.json());
+app.use(cors({
+  origin: 'http://localhost:5173',
+}),);
 
 
-// API-endpoints
+// Custom middleware 
+const myMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  console.log("Hi from middleware!! ");
+  next();
+}
 
-// ┌────────┬──────────────┬──────────────────────┬──────────────────────┐
-// │ Metod  │    Route     │         Auth         │     Beskrivning      │
-// ├────────┼──────────────┼──────────────────────┼──────────────────────┤
-// │ POST   │ /auth/signup │ —                    │ Registrera användare │
-// ├────────┼──────────────┼──────────────────────┼──────────────────────┤
-// │ POST   │ /auth/signin │ —                    │ Logga in, få JWT     │
-// ├────────┼──────────────┼──────────────────────┼──────────────────────┤
-// │ GET    │ /posts       │ —                    │ Se alla inlägg       │
-// ├────────┼──────────────┼──────────────────────┼──────────────────────┤
-// │ POST   │ /posts       │ Bearer token         │ Skapa inlägg         │
-// ├────────┼──────────────┼──────────────────────┼──────────────────────┤
-// │ PUT    │ /posts/:id   │ Bearer token (ägare) │ Redigera eget inlägg │
-// ├────────┼──────────────┼──────────────────────┼──────────────────────┤
-// │ DELETE │ /posts/:id   │ Bearer token (ägare) │ Ta bort eget inlägg  │
-// └────────┴──────────────┴──────────────────────┴──────────────────────┘
 
 // Routes
+app.get("/hello", myMiddleware, (req, res) => {
+  res.send("hello");
+})
+
+app.post("/hello", (req, res) => {
+  res.json({"message": "hello from post"});
+})
+
 
 
 app.listen(PORT, () => {
