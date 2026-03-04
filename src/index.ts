@@ -6,9 +6,9 @@ import authRoutes from './routes/auth'
 import postsRoutes from './routes/posts'
 
 const app = express()
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 3000
 
-// Befintligt middleware snom vi använder globalt (för varje request som kommer in så körs denna middleware)
+// Befintligt middleware som vi använder globalt (för varje request som kommer in så körs denna middleware)
 app.use(morgan('tiny'));
 app.use(express.json());
 app.use(cors({
