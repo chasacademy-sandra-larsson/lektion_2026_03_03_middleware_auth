@@ -45,9 +45,9 @@ app.use(cors({
 // ├────────┼──────────────┼──────────────────────┼──────────────────────┤
 // │ POST   │ /posts       │ JWT token            │ Skapa inlägg         │
 // ├────────┼──────────────┼──────────────────────┼──────────────────────┤
-// │ PUT    │ /posts/:id   │ JWT token (ägare)    │ Redigera eget inlägg │
+// │ PUT    │ /posts/:id   │ JWT token            │ Redigera eget inlägg │
 // ├────────┼──────────────┼──────────────────────┼──────────────────────┤
-// │ DELETE │ /posts/:id   │ JWT token (ägare)    │ Ta bort eget inlägg  │
+// │ DELETE │ /posts/:id   │ JWT token            │ Ta bort eget inlägg  │
 // └────────┴──────────────┴──────────────────────┴──────────────────────┘
 
 // Routes

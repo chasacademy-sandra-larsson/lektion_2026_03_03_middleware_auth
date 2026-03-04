@@ -51,10 +51,42 @@ router.post('/signup', async (req, res) => {
 // Signin route
 router.post('/signin', async (req, res) => {
 
+
+    try {
+
     // 1. Hämta email och password från body
+    const { email, password } = req.body;
+
     // 2. Kolla att email finns i databasen 
+    const [ user ] = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, email))
+
+    // Användaren är inte authentiserrad 
+    if(!user) {
+        res.status(401).json({error: "Du är inte registrerad på denna blogg"});
+        return;
+    }
+
     // 3. Om email finns använda bcrypt.compare för att jämföra db:s hashade lösenord mot det hashade lösenordet som använadre signar in med.
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if(!passwordMatch) {
+        res.status(401).json({error: "Lösenordet matchar inte"});
+        return;
+    }
+
+    // Authenticated, skapa en JWT!
     // 4. Om 3. verifieras skicka en JWT (jwt.sign) till klienten
+    const token = jwt.sign({userId: user.id}, JWT_SECRET, {expiresIn: '7d'});
+
+    res.json({token, user: { id: user.id, email: user.email}})
+
+    } catch(error: unknown) {
+
+        console.log(error);
+    }
 
 });
 

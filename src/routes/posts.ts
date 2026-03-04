@@ -2,11 +2,10 @@ import { eq } from 'drizzle-orm'
 import { Router } from 'express'
 import { db } from '../db'
 import { posts, users } from '../db/schema'
+import { AuthRequest, authenticate } from '../middleware/auth'
 
 const router = Router()
 
-// Hårdkodad userId för att testa
-const userId = 1
 
 // GET /posts — publik, alla kan se alla inlägg
 router.get('/', async (req, res) => {
@@ -27,7 +26,7 @@ router.get('/', async (req, res) => {
 })
 
 // POST /posts — skyddad, måste vara inloggad
-router.post('/', async (req, res) => {
+router.post('/', authenticate, async (req: AuthRequest, res) => {
   const { title, content } = req.body
 
   if (!title || !content) {
@@ -37,14 +36,14 @@ router.post('/', async (req, res) => {
 
   const [post] = await db
     .insert(posts)
-    .values({ title, content, userId: userId! })
+    .values({ title, content, userId: req.userId! })
     .returning()
 
   res.status(201).json(post)
 })
 
 // PUT /posts/:id — skyddad, bara ägaren kan redigera
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticate, async (req: AuthRequest, res) => {
   const id = parseInt(req.params.id)
   const { title, content } = req.body
 
@@ -55,7 +54,7 @@ router.put('/:id', async (req, res) => {
     return
   }
 
-  if (existing.userId !== userId) {
+  if (existing.userId !== req.userId) {
     res.status(403).json({ error: 'Du kan bara redigera dina egna inlägg' })
     return
   }
@@ -73,7 +72,7 @@ router.put('/:id', async (req, res) => {
 })
 
 // DELETE /posts/:id — skyddad, bara ägaren kan ta bort
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticate, async (req: AuthRequest, res) => {
   const id = parseInt(req.params.id)
 
   const [existing] = await db.select().from(posts).where(eq(posts.id, id))
@@ -83,7 +82,7 @@ router.delete('/:id', async (req, res) => {
     return
   }
 
-  if (existing.userId !== userId) {
+  if (existing.userId !== req.userId) {
     res.status(403).json({ error: 'Du kan bara ta bort dina egna inlägg' })
     return
   }
